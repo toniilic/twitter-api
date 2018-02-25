@@ -25,7 +25,8 @@ Screen name: <input type="text" name="name"><br>
 // Add user to users.txt
 if(isset($_POST["id"])) {
 
-    // todo: check if id already exists
+    // If users with such id doesn't exist, save to a file,
+    // otherwise echo a message
     if(check_if_such_id_already_exists($_POST["id"])) {
         echo 'User with id <strong>' . $_POST["id"] . '</strong> already exists.';
         echo 'Please choose another id.';
@@ -44,14 +45,16 @@ if(isset($_POST["id"])) {
 // Check if user with such id exists
 function check_if_such_id_already_exists($id) {
     $file = file("users.txt");
-    $len = count($file);;
+    $len = count($file);
+    $exists = false;
     for($i = 0; $i < $len; $i++) {
-        if(explode(',',$file[$i])[0] != $id) {
-            return true;
-        } else {
-            return false;
+        $current_id = explode(',',$file[$i])[0];
+        if($current_id === $id) {
+            $exists = true;
         }
     }
+    return $exists;
+
 }
 
 // List users from users.txt
