@@ -6,30 +6,61 @@
  * Time: 07:49
  */
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 require __DIR__.'/vendor/autoload.php';
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 
+// enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Add user form
 echo '<h2>Add a new user</h2>';
-echo '<form action="welcome.php" method="post">
+echo '<form action="/" method="post">
 Id: <input type="text" name="id"><br>
-Screen name: <input type="text" name="screen_name"><br>
+Screen name: <input type="text" name="name"><br>
 <input type="submit">
 </form>';
 
+// Add user to users.txt
+if(isset($_POST["id"])) {
 
-// List users in the database
+    // todo: check if id already exists
+    if(check_if_such_id_already_exists($_POST["id"])) {
+        echo 'User with id <strong>' . $_POST["id"] . '</strong> already exists.';
+        echo 'Please choose another id.';
+    } else {
+        // Save data to text file
+        file_put_contents(
+            "users.txt","\n".$_POST["id"].','.$_POST["name"],FILE_APPEND
+        );
+    }
+
+
+}
+
+
+
+// Check if user with such id exists
+function check_if_such_id_already_exists($id) {
+    $file = file("users.txt");
+    $len = count($file);;
+    for($i = 0; $i < $len; $i++) {
+        if(explode(',',$file[$i])[0] != $id) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+// List users from users.txt
 $file = file("users.txt");
 $len = count($file);
 echo '<h2>Users is users.txt</h2>';
 for($i = 0; $i < $len; $i++) {
     echo $file[$i] .
-        '<a href="/?screen_name=' .
+        '   <a href="/?screen_name=' .
         trim(explode(',', $file[$i])[1])
         . '">Show followers</a>'
         .'<br>';
@@ -54,6 +85,12 @@ if(isset($_GET["screen_name"])) {
     echo '<h2>Followers of ' . $_GET["screen_name"] . '</h2>';
     $followers = get_followers('7sedam7');
 
+    // check if API limit exceeded
+    if(isset($followers->errors[0]->message)) {
+        echo $followers->errors[0]->message;
+    }
+
+    // echo followers
     if(isset($followers->users)) {
         $users = $followers->users;
 
@@ -64,8 +101,7 @@ if(isset($_GET["screen_name"])) {
 
 }
 
-// Save data to text file
-// file_put_contents("file.txt","\n31231231",FILE_APPEND);
+
 
 
 
