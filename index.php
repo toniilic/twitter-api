@@ -34,11 +34,11 @@ if(isset($_POST["id"])) {
     if(check_if_such_id_already_exists($_POST["id"])) {
 
         echo 'User with id <strong>' . $_POST["id"] . '</strong> already exists.';
-        echo 'Please choose another id.';
-    } if(!check_if_such_screen_name_exists($_POST["name"])) {
+        echo 'Please choose another id.<br>';
+    } elseif(!check_if_such_twitter_screen_name_exists($_POST["name"])) {
 
         echo 'User with screen name <strong>' . $_POST["name"] . '</strong> doesn\'t exist.';
-        echo 'Please choose another screen name.';
+        echo 'Please choose a valid screen name.';
     } else {
         // Save data to text file
         file_put_contents(
@@ -47,8 +47,23 @@ if(isset($_POST["id"])) {
     }
 }
 
-// Check if such screen name already exists
-function check_if_such_screen_name_exists($screen_name)
+// Delete user with specified id
+function delete_user_with_id($id) {
+    $file = file("users.txt");
+    $len = count($file);
+    $exists = false;
+    for($i = 0; $i < $len; $i++) {
+        $current_id = explode(',',$file[$i])[0];
+        if($current_id === $id) {
+            $exists = true;
+        }
+    }
+    return $exists;
+
+}
+
+// Check if such screen name already exists in Twitter
+function check_if_such_twitter_screen_name_exists($screen_name)
 {
     $connection = initiate_api_connection();
 
@@ -70,6 +85,7 @@ for($i = 0; $i < $len; $i++) {
         '   <a href="/?screen_name=' .
         trim(explode(',', $file[$i])[1])
         . '">Show followers</a>'
+
         .'<br>';
 }
 
